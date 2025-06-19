@@ -16,15 +16,34 @@ export async function sendCode(req, res) {
       .verifications
       .create({ to: phoneNumber, channel: 'sms' });
 
-    res.json({ message: 'Verification code sent' });
+    res.status(200).json({
+      success: true,
+      status: 'code_sent',
+      message: 'Verification code sent successfully'
+    });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    const statusCode = err.status || 500;
+
+    res.status(statusCode).json({
+      success: false,
+      status: 'code_failed',
+      errorCode: err.code,
+      message: err.message
+    });
   }
 }
 
+
 export async function verifyCode(req, res) {
   const { phoneNumber, code } = req.body;
-  if (!phoneNumber || !code) return res.status(400).json({ error: 'Phone number and code are required' });
+
+  if (!phoneNumber || !code) {
+    return res.status(400).json({
+      success: false,
+      status: 'invalid_input',
+      message: 'Phone number and code are required'
+    });
+  }
 
   try {
     const result = await client.verify.v2.services(serviceSid)
@@ -32,11 +51,28 @@ export async function verifyCode(req, res) {
       .create({ to: phoneNumber, code });
 
     if (result.status === 'approved') {
-      res.json({ success: true });
+      return res.status(200).json({
+        success: true,
+        status: 'code_verified',
+        message: 'Verification successful'
+      });
     } else {
-      res.status(401).json({ success: false, message: 'Invalid or expired code' });
+      return res.status(401).json({
+        success: false,
+        status: 'verification_failed',
+        message: 'Code is invalid or expired',
+        twilioStatus: result.status
+      });
     }
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    const statusCode = err.status || 500;
+
+    return res.status(statusCode).json({
+      success: false,
+      status: 'twilio_error',
+      errorCode: err.code,
+      message: err.message
+    });
   }
 }
+
