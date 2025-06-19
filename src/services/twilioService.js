@@ -48,6 +48,7 @@ export async function sendCode(req, res) {
 
 export async function verifyCode(req, res) {
   const { phoneNumber, code } = req.body;
+  const sanitizedPhoneNumber = sanitizeMexicanPhoneNumber(phoneNumber);
 
   if (!phoneNumber || !code) {
     return res.status(400).json({
@@ -57,10 +58,16 @@ export async function verifyCode(req, res) {
     });
   }
 
+  if (!sanitizedPhoneNumber) {
+    return res.status(400).json({
+      error: 'Número inválido. Asegúrate de usar un número mexicano de 10 dígitos o en formato +52XXXXXXXXXX',
+    });
+  }
+
   try {
     const result = await client.verify.v2.services(serviceSid)
       .verificationChecks
-      .create({ to: phoneNumber, code });
+      .create({ to: sanitizedPhoneNumber, code });
 
     if (result.status === 'approved') {
       return res.status(200).json({
