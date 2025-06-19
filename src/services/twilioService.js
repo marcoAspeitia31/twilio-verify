@@ -1,4 +1,5 @@
 import twilio from 'twilio';
+import { sanitizeMexicanPhoneNumber } from '../utils/formatPhone.js';
 import { twilioErrorMessages } from '../utils/twilioErrorMap.js';
 
 const client = twilio(
@@ -10,9 +11,14 @@ const serviceSid = process.env.TWILIO_VERIFY_SERVICE_SID;
 
 export async function sendCode(req, res) {
   const { phoneNumber } = req.body;
+  const sanitized = sanitizeMexicanPhoneNumber(phoneNumber);
 
   if (!phoneNumber) {
-    return res.status(400).json({ error: 'Phone number is required' });
+    return res.status(400).json({ error: 'El numero de teléfono es requerido' });
+  }
+
+  if (!sanitized) {
+    return res.status(400).json({ error: 'Número inválido. Usa formato mexicano de 10 dígitos o +52' });
   }
 
   try {
