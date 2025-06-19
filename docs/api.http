@@ -1,20 +1,22 @@
 ### Enviar código de verificación
-POST https://tudominio.com/api/verify/send-code
-Authorization: Basic YWRtaW46c3VwZXJzZWN1cmVwYXNzd29yZA==
+POST http://localhost:3000/api/send-code
 Content-Type: application/json
+Authorization: Basic TU_USUARIO:TOKEN
+Accept: application/json
 
 {
-  "phoneNumber": "+521XXXXXXXXXX"
+  "phoneNumber": "+521234567890"
 }
 
 ###
 
-### Verificar código recibido
-POST https://tudominio.com/api/verify/verify-code
-Authorization: Basic YWRtaW46c3VwZXJzZWN1cmVwYXNzd29yZA==
+### Verificar código recibido por SMS
+POST http://localhost:3000/api/verify-code
 Content-Type: application/json
+Authorization: Basic TU_USUARIO:TOKEN
+Accept: application/json
 
 {
-  "phoneNumber": "+521XXXXXXXXXX",
+  "phoneNumber": "+521234567890",
   "code": "123456"
 }
