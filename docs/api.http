@@ -1,0 +1,20 @@
+### Enviar código de verificación
+POST https://tudominio.com/api/verify/send-code
+Authorization: Basic YWRtaW46c3VwZXJzZWN1cmVwYXNzd29yZA==
+Content-Type: application/json
+
+{
+  "phoneNumber": "+521XXXXXXXXXX"
+}
+
+###
+
+### Verificar código recibido
+POST https://tudominio.com/api/verify/verify-code
+Authorization: Basic YWRtaW46c3VwZXJzZWN1cmVwYXNzd29yZA==
+Content-Type: application/json
+
+{
+  "phoneNumber": "+521XXXXXXXXXX",
+  "code": "123456"
+}
