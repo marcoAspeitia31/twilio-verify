@@ -11,20 +11,20 @@ const serviceSid = process.env.TWILIO_VERIFY_SERVICE_SID;
 
 export async function sendCode(req, res) {
   const { phoneNumber } = req.body;
-  const sanitized = sanitizeMexicanPhoneNumber(phoneNumber);
+  const sanitizedPhoneNumber = sanitizeMexicanPhoneNumber(phoneNumber);
 
   if (!phoneNumber) {
     return res.status(400).json({ error: 'El numero de teléfono es requerido' });
   }
 
-  if (!sanitized) {
+  if (!sanitizedPhoneNumber) {
     return res.status(400).json({ error: 'Número inválido. Usa formato mexicano de 10 dígitos o +52' });
   }
 
   try {
     await client.verify.v2.services(serviceSid)
       .verifications
-      .create({ to: phoneNumber, channel: 'sms' });
+      .create({ to: sanitizedPhoneNumber, channel: 'sms' });
 
     res.status(200).json({
       success: true,
