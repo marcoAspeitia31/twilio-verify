@@ -1,6 +1,7 @@
 import twilio from 'twilio';
 import { sanitizeMexicanPhoneNumber } from '../utils/formatPhone.js';
 import { twilioErrorMessages } from '../utils/twilioErrorMap.js';
+import { logInfo, logError } from '../utils/logger.js';
 
 const client = twilio(
   process.env.TWILIO_ACCOUNT_SID,
@@ -26,6 +27,8 @@ export async function sendCode(req, res) {
       .verifications
       .create({ to: sanitizedPhoneNumber, channel: 'sms' });
 
+    logInfo(`Código enviado a ${sanitizedPhoneNumber}`);
+
     res.status(200).json({
       success: true,
       status: 'code_sent',
@@ -35,6 +38,8 @@ export async function sendCode(req, res) {
     const statusCode = err.status || 500;
     const errorCode = err.code || 'unknown';
     const translatedMessage = twilioErrorMessages[errorCode] || twilioErrorMessages['unknown'];
+
+    logError(`Error al enviar código a ${sanitizedPhoneNumber} - ${translatedMessage}`);
 
     return res.status(statusCode).json({
       success: false,
@@ -69,6 +74,8 @@ export async function verifyCode(req, res) {
       .verificationChecks
       .create({ to: sanitizedPhoneNumber, code });
 
+    logInfo(`Código enviado a ${sanitizedPhoneNumber}`);
+
     if (result.status === 'approved') {
       return res.status(200).json({
         success: true,
@@ -87,6 +94,8 @@ export async function verifyCode(req, res) {
     const statusCode = err.status || 500;
     const errorCode = err.code || 'unknown';
     const translatedMessage = twilioErrorMessages[errorCode] || twilioErrorMessages['unknown'];
+
+    logError(`Error al enviar código a ${sanitizedPhoneNumber} - ${translatedMessage}`);
 
     return res.status(statusCode).json({
       success: false,
