@@ -122,7 +122,17 @@ Este script:
    ```bash
    ./restart.sh
    ```
+## 🧹 Mantenimiento y depuración de Docker
 
+En ocasiones, al reconstruir la imagen o liberar espacio en disco, puede ser útil limpiar recursos no utilizados de Docker.
+
+### Limpiar Docker por completo
+
+> ⚠️ **Advertencia:** Este comando eliminará todas las imágenes, contenedores detenidos, redes no utilizadas y caché de volúmenes.
+
+```bash
+docker system prune -a
+```
 ---
 
 ## 📄 Consultar logs
