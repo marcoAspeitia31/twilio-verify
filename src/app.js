@@ -1,6 +1,6 @@
 import express from 'express';
 import { corsMiddleware, handleCorsError } from './middlewares/corsMiddleware.js';
-import authMiddleware from './middlewares/authMiddleware.js';
+import { authMiddleware } from './middlewares/authMiddleware.js';
 import verificationRoutes from './routes/verification.js';
 
 const app = express();
