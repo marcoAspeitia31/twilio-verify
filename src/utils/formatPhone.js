@@ -1,4 +1,4 @@
-export function sanitizeMexicanPhoneNumber(phoneNumber) {
+function sanitizeMexicanPhoneNumber(phoneNumber) {
   if (!phoneNumber) return null;
 
   // Eliminar todo lo que no sea número
@@ -17,3 +17,5 @@ export function sanitizeMexicanPhoneNumber(phoneNumber) {
   // Número inválido
   return null;
 }
+
+export { sanitizeMexicanPhoneNumber }
