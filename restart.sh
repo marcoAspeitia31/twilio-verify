@@ -2,6 +2,15 @@
 
 echo "🔁 Reiniciando backend..."
 
+# Paso 0: asegurar que la carpeta logs existe y tiene permisos correctos
+if [ ! -d "logs" ]; then
+  echo "📂 Carpeta logs/ no encontrada. Creándola..."
+  mkdir logs
+  sudo chown -R 1000:1000 logs
+else
+  echo "✅ Carpeta logs/ ya existe"
+fi
+
 # Paso 1: detener contenedor si existe
 docker compose down
 
