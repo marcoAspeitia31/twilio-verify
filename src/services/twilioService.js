@@ -75,7 +75,7 @@ export async function verifyCode(req, res) {
       .verificationChecks
       .create({ to: sanitizedPhoneNumber, code });
 
-    logger.info(`Código enviado a ${sanitizedPhoneNumber}`);
+    logger.info(`Verificación de código para ${sanitizedPhoneNumber} - Estado: ${result.status}`);
 
     if (result.status === 'approved') {
       return res.status(200).json({
