@@ -9,6 +9,8 @@ Este proyecto es una API REST construida en Node.js que permite verificar númer
 - Node.js 18 o superior
 - Docker y Docker Compose
 - Cuenta Twilio con servicio Verify
+- [Trivy (opcional)](https://aquasecurity.github.io/trivy/) para escaneo de seguridad
+- Carpeta `logs/` creada con permisos (el sistema lo crea si no existe)
 - Apps móviles cliente (Flutter, Apphive, etc.)
 
 ---
@@ -83,6 +85,13 @@ CORS_ORIGINS=*
 ```bash
 ./restart.sh
 ```
+> 🛡️  `restart.sh` ejecuta automáticamente `scan.sh` para detectar vulnerabilidades en la imagen antes de reconstruir.
+
+Este script:
+- Detiene el contenedor.
+- Reconstruye la imagen.
+- Escanea la imagen con **Trivy** (si está instalado).
+- Levanta el contenedor.
 
 ### 🛑 Detener contenedor
 
@@ -130,11 +139,17 @@ docker logs -f twilio-verify
 cat logs/app-YYYY-MM-DD.log
 ```
 
-> Los logs están rotados automáticamente por fecha y tamaño gracias a Winston.
+Los logs se almacenan en `logs/` y se rotan diariamente:
+
+- `backend-YYYY-MM-DD.log`: logs generales (info, warn, error)
+- `error.log`: errores críticos acumulados
+
+> Winston crea automáticamente los archivos con compresión `.gz` para logs antiguos.
+
 
 ---
 
-## 🧰 Ejecutar sin Docker (modo local)
+## 🧰 Ejecutar con NPM (Uso sin Docker)
 
 Si no deseas usar Docker, puedes correr el proyecto localmente con Node.js:
 
@@ -216,7 +231,7 @@ Puedes probarlo desde `docs/api.http` con VS Code (REST Client) o desde Postman.
 ### Enviar código:
 
 ```http
-POST http://localhost:7001/send-code
+POST http://localhost:3000//api/verify/send-code
 Authorization: Basic base64userpass
 Content-Type: application/json
 
@@ -228,7 +243,7 @@ Content-Type: application/json
 ### Verificar código:
 
 ```http
-POST http://localhost:7001/verify-code
+POST http://localhost:3000//api/verify/verify-code
 Authorization: Basic base64userpass
 Content-Type: application/json
 

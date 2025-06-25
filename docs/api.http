@@ -1,7 +1,7 @@
 ### Enviar código de verificación
-POST http://localhost:3000/api/send-code
+POST http://localhost:3000//api/verify/send-code
 Content-Type: application/json
-Authorization: Basic TU_USUARIO:TOKEN
+Authorization: Basic base64userpass
 Accept: application/json
 
 {
@@ -11,9 +11,9 @@ Accept: application/json
 ###
 
 ### Verificar código recibido por SMS
-POST http://localhost:3000/api/verify-code
+POST http://localhost:3000//api/verify/verify-code
 Content-Type: application/json
-Authorization: Basic TU_USUARIO:TOKEN
+Authorization: Basic base64userpass
 Accept: application/json
 
 {
