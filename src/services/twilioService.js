@@ -10,101 +10,123 @@ const client = twilio(
 
 const serviceSid = process.env.TWILIO_VERIFY_SERVICE_SID;
 
-export async function sendCode(req, res) {
-  const { phoneNumber } = req.body;
-  const sanitizedPhoneNumber = sanitizeMexicanPhoneNumber(phoneNumber);
+export async function sendCode(phoneNumber) {
+  const sanitizedPhone = sanitizeMexicanPhoneNumber(phoneNumber);
 
   if (!phoneNumber) {
-    return res.status(400).json({ error: 'El numero de teléfono es requerido' });
+    return {
+      status: 400,
+      payload: { success: false, message: 'El número de teléfono es requerido' }
+    };
   }
 
-  if (!sanitizedPhoneNumber) {
-    return res.status(400).json({ error: 'Número inválido. Usa formato mexicano de 10 dígitos o +52' });
+  if (!sanitizedPhone) {
+    return {
+      status: 400,
+      payload: { success: false, message: 'Número inválido. Usa formato mexicano de 10 dígitos o +52' }
+    };
   }
 
   try {
     await client.verify.v2.services(serviceSid)
       .verifications
-      .create({ to: sanitizedPhoneNumber, channel: 'sms' });
+      .create({ to: sanitizedPhone, channel: 'sms' });
 
-    logger.info(`Código enviado a ${sanitizedPhoneNumber}`);
+    logger.info(`Código enviado a ${sanitizedPhone}`);
 
-    res.status(200).json({
-      success: true,
-      status: 'code_sent',
-      message: 'Código de verificación enviado exitosamente'
-    });
+    return {
+      status: 200,
+      payload: {
+        success: true,
+        status: 'code_sent',
+        message: 'Código de verificación enviado exitosamente'
+      }
+    };
   } catch (err) {
     const statusCode = err.status || 500;
     const errorCode = err.code || 'unknown';
     const translatedMessage = twilioErrorMessages[errorCode] || twilioErrorMessages['unknown'];
 
-    logger.error(`Error al enviar código a ${sanitizedPhoneNumber} - ${translatedMessage}`);
+    logger.error(`Error al enviar código a ${sanitizedPhone} - ${translatedMessage}`);
 
-
-    return res.status(statusCode).json({
-      success: false,
-      status: 'twilio_error',
-      errorCode,
-      message: translatedMessage
-    });
+    return {
+      status: statusCode,
+      payload: {
+        success: false,
+        status: 'twilio_error',
+        errorCode,
+        message: translatedMessage
+      }
+    };
   }
 }
 
-
-export async function verifyCode(req, res) {
-  const { phoneNumber, code } = req.body;
-  const sanitizedPhoneNumber = sanitizeMexicanPhoneNumber(phoneNumber);
+export async function verifyCode(phoneNumber, code) {
+  const sanitizedPhone = sanitizeMexicanPhoneNumber(phoneNumber);
 
   if (!phoneNumber || !code) {
-    return res.status(400).json({
-      success: false,
-      status: 'invalid_input',
-      message: 'Número de teléfono y código son requeridos'
-    });
+    return {
+      status: 400,
+      payload: {
+        success: false,
+        status: 'invalid_input',
+        message: 'Número de teléfono y código son requeridos'
+      }
+    };
   }
 
-  if (!sanitizedPhoneNumber) {
-    return res.status(400).json({
-      error: 'Número inválido. Asegúrate de usar un número mexicano de 10 dígitos o en formato +52XXXXXXXXXX',
-    });
+  if (!sanitizedPhone) {
+    return {
+      status: 400,
+      payload: {
+        success: false,
+        message: 'Número inválido. Usa formato mexicano de 10 dígitos o +52'
+      }
+    };
   }
 
   try {
     const result = await client.verify.v2.services(serviceSid)
       .verificationChecks
-      .create({ to: sanitizedPhoneNumber, code });
+      .create({ to: sanitizedPhone, code });
 
-    logger.info(`Verificación de código para ${sanitizedPhoneNumber} - Estado: ${result.status}`);
+    logger.info(`Verificación para ${sanitizedPhone} - Status: ${result.status}`);
 
     if (result.status === 'approved') {
-      return res.status(200).json({
-        success: true,
-        status: 'code_verified',
-        message: 'Verificación exitosa'
-      });
+      return {
+        status: 200,
+        payload: {
+          success: true,
+          status: 'code_verified',
+          message: 'Verificación exitosa'
+        }
+      };
     } else {
-      return res.status(401).json({
-        success: false,
-        status: 'verification_failed',
-        message: 'El código es inválido o ha expirado',
-        twilioStatus: result.status
-      });
+      return {
+        status: 401,
+        payload: {
+          success: false,
+          status: 'verification_failed',
+          message: 'El código es inválido o ha expirado',
+          twilioStatus: result.status
+        }
+      };
     }
   } catch (err) {
     const statusCode = err.status || 500;
     const errorCode = err.code || 'unknown';
     const translatedMessage = twilioErrorMessages[errorCode] || twilioErrorMessages['unknown'];
 
-    logger.error(`Error al enviar código a ${sanitizedPhoneNumber} - ${translatedMessage}`);
+    logger.error(`Error al verificar código de ${sanitizedPhone} - ${translatedMessage}`);
 
-
-    return res.status(statusCode).json({
-      success: false,
-      status: 'twilio_error',
-      errorCode,
-      message: translatedMessage
-    });
+    return {
+      status: statusCode,
+      payload: {
+        success: false,
+        status: 'twilio_error',
+        errorCode,
+        message: translatedMessage
+      }
+    };
   }
 }
-

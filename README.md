@@ -1,4 +1,4 @@
-# SMS Verification App
+# 📲 Microservicio de Verificación SMS con Twilio
 
 Este proyecto es una API REST construida en Node.js que permite verificar números telefónicos mediante SMS usando Twilio Verify. Incluye autenticación básica, soporte para CORS y está listo para ser desplegado en Docker.
 
@@ -13,7 +13,33 @@ Este proyecto es una API REST construida en Node.js que permite verificar númer
 
 ---
 
-## 🔧 Configuración
+## 🧱 Estructura del Proyecto
+
+```
+.
+├── docs/api.http             # Ejemplos de peticiones
+├── logs/                     # Logs rotados por Winston
+├── src/
+│   ├── controllers/          # Manejo de req/res
+│   ├── services/             # Lógica Twilio y reglas de negocio
+│   ├── routes/               # Rutas Express
+│   ├── middlewares/          # CORS y auth
+│   ├── utils/                # Logger, sanitización, errores Twilio
+│   └── app.js
+├── .dockerignore
+├── .env.example / .env
+├── .gitignore
+├── docker-compose.yml
+├── Dockerfile
+├── index.js
+├── package.json
+├── README.md
+└── run.sh / restart.sh / stop.sh / scan.sh
+```
+
+---
+
+## 🔧 Configuración de Variables de entorno
 
 1. Clona el repositorio y copia el archivo `.env.example` a `.env`.
 
@@ -43,17 +69,104 @@ CORS_ORIGINS=*
 
 ---
 
-## 🚀 Uso con Docker
+
+## 🐳 Uso con Docker
+
+### 🚀 Levantar en desarrollo
 
 ```bash
-docker-compose up --build
+./run.sh
 ```
 
-Esto iniciará el servidor en `http://localhost:3000`.
+### 🔁 Reiniciar (por cambios en código)
+
+```bash
+./restart.sh
+```
+
+### 🛑 Detener contenedor
+
+```bash
+./stop.sh
+```
+
+### 🔍 Escanear vulnerabilidades (requiere docker scan y Trivy)
+
+```bash
+./scan.sh
+```
 
 ---
 
-## 🛠️ Endpoints disponibles
+## 📥 Actualizar microservicio en VPS
+
+1. **Conectarse por SSH**
+2. **Detener contenedor**
+   ```bash
+   ./stop.sh
+   ```
+3. **Obtener última versión del código**
+   ```bash
+   git pull origin main  # o la rama correspondiente
+   ```
+4. **Reiniciar con Docker**
+   ```bash
+   ./restart.sh
+   ```
+
+---
+
+## 📄 Consultar logs
+
+### En consola:
+
+```bash
+docker logs -f twilio-verify
+```
+
+### En archivo:
+
+```bash
+cat logs/app-YYYY-MM-DD.log
+```
+
+> Los logs están rotados automáticamente por fecha y tamaño gracias a Winston.
+
+---
+
+## 🧰 Ejecutar sin Docker (modo local)
+
+Si no deseas usar Docker, puedes correr el proyecto localmente con Node.js:
+
+### 1. Instalar dependencias
+
+```bash
+npm install
+```
+
+### 2. Crear archivo `.env`
+
+Basado en `.env.example`, agrega tus variables.
+
+### 3. Ejecutar el servidor
+
+```bash
+npm start
+```
+
+> Asegúrate de que el puerto `3000` esté libre o cámbialo en `.env`
+
+---
+
+## 📡 Endpoints disponibles
+
+Todos los endpoints requieren **autenticación básica** (`AUTH_USER` / `AUTH_PASS`).
+
+| Método | Ruta                        | Descripción                    |
+|--------|-----------------------------|--------------------------------|
+| POST   | `/api/verify/send-code`     | Enviar SMS de verificación     |
+| POST   | `/api/verify/verify-code`   | Verificar código recibido      |
+
 
 ### `POST /api/verify/send-code`
 
@@ -88,30 +201,43 @@ Verifica el código recibido.
 
 ---
 
-## 🧪 Ejemplos de pruebas HTTP (`docs/api.http`)
+## 🔐 Seguridad
 
-Puedes usar la extensión "REST Client" en Visual Studio Code para probar estos endpoints:
+- CORS configurado por dominios permitidos desde `.env`
+- Middleware de autenticación HTTP Basic
+- Logger con rotación por día y tamaño
+
+---
+
+## 🧪 Ejemplo de peticiones HTTP
+
+Puedes probarlo desde `docs/api.http` con VS Code (REST Client) o desde Postman.
+
+### Enviar código:
 
 ```http
-### Enviar código de verificación
-POST https://tudominio.com/api/verify/send-code
-Authorization: Basic YWRtaW46c3VwZXJzZWN1cmVwYXNzd29yZA==
+POST http://localhost:7001/send-code
+Authorization: Basic base64userpass
 Content-Type: application/json
 
 {
-  "phoneNumber": "+521XXXXXXXXXX"
+  "phoneNumber": "+521722XXXXXXX"
 }
+```
 
-### Verificar código recibido
-POST https://tudominio.com/api/verify/verify-code
-Authorization: Basic YWRtaW46c3VwZXJzZWN1cmVwYXNzd29yZA==
+### Verificar código:
+
+```http
+POST http://localhost:7001/verify-code
+Authorization: Basic base64userpass
 Content-Type: application/json
 
 {
-  "phoneNumber": "+521XXXXXXXXXX",
+  "phoneNumber": "+521722XXXXXXX",
   "code": "123456"
 }
 ```
+
 
 > 🧠 Puedes convertir el usuario y contraseña de autenticación básica con:  
 > `echo -n 'admin:supersecurepassword' | base64`
@@ -123,6 +249,13 @@ Content-Type: application/json
 - Usar `CORS_ORIGINS=*` si tu app móvil (por ejemplo, hecha en Apphive) consume la API directamente.
 - No subas el archivo `.env` a Git.
 - Asegura el acceso a la API usando HTTPS y autenticación básica.
+
+---
+
+## 👤 Autor
+
+Marco Aspeitia  
+Desarrollador Backend – CIDEAPPS
 
 ---
 
