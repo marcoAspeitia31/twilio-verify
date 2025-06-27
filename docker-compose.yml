@@ -1,9 +1,24 @@
-version: '3'
 services:
-  sms-app:
-    build: .
+  twilio-verify:
+    image: twilio-verify:latest
+    build:
+      context: .
+      args:
+        - PORT=${PORT}
+    container_name: twilio-verify
     ports:
-      - "3000:3000"
+      - "127.0.0.1:${PORT}:${PORT}"
     env_file:
       - .env
-    restart: unless-stopped
+    environment:
+      - PORT=${PORT}
+    restart: always
+    user: "node"
+    volumes:
+      - ./logs:/app/logs
+    networks:
+      - local_net
+
+networks:
+  local_net:
+    driver: bridge
