@@ -1,8 +1,8 @@
-@host = http://localhost:3000
+@host = http://localhost:5004
 @basicAuth = YWRtaW46c3VwZXJzZWN1cmVwYXNzd29yZA==
 
 ### Enviar código de verificación
-POST http://localhost:3000/api/verify/send-code
+POST http://localhost:5004/api/verify/send-code
 Content-Type: application/json
 Authorization: Basic {{basicAuth}}
 
@@ -11,11 +11,11 @@ Authorization: Basic {{basicAuth}}
 }
 
 ### Verificar código
-POST http://localhost:3000/api/verify/verify-code
+POST http://localhost:5004/api/verify/verify-code
 Content-Type: application/json
 Authorization: Basic {{basicAuth}}
 
 {
   "phoneNumber": "+527225494079",
-  "code": "433844"
+  "code": "458121"
 }
