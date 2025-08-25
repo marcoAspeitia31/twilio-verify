@@ -3,12 +3,41 @@ import { sanitizeMexicanPhoneNumber } from '../utils/formatPhone.js';
 import { twilioErrorMessages } from '../utils/twilioErrorMap.js';
 import logger from '../utils/logger.js';
 
-const client = twilio(
-  process.env.TWILIO_ACCOUNT_SID,
-  process.env.TWILIO_AUTH_TOKEN
-);
+let client;
+let serviceSid;
 
-const serviceSid = process.env.TWILIO_VERIFY_SERVICE_SID;
+function ensureTwilioClient() {
+  const {
+    TWILIO_ACCOUNT_SID,
+    TWILIO_AUTH_TOKEN,
+    TWILIO_API_KEY,
+    TWILIO_API_SECRET,
+    TWILIO_VERIFY_SERVICE_SID,
+  } = process.env;
+
+  if (!TWILIO_VERIFY_SERVICE_SID) {
+    throw new Error('[Config] Falta TWILIO_VERIFY_SERVICE_SID');
+  }
+
+  if (!client) {
+    // Opción A: SID + Auth Token
+    if (TWILIO_ACCOUNT_SID && TWILIO_AUTH_TOKEN) {
+      client = new twilio(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
+    }
+    // Opción B: API Keys
+    else if (TWILIO_API_KEY && TWILIO_API_SECRET && TWILIO_ACCOUNT_SID) {
+      client = new twilio(TWILIO_API_KEY, TWILIO_API_SECRET, {
+        accountSid: TWILIO_ACCOUNT_SID,
+      });
+    }
+    else {
+      throw new Error('[Config] Faltan credenciales Twilio (SID/Auth o API Key/Secret)');
+    }
+  }
+
+  serviceSid = TWILIO_VERIFY_SERVICE_SID;
+  return { client, serviceSid };
+}
 
 export async function sendCode(phoneNumber) {
   const sanitizedPhone = sanitizeMexicanPhoneNumber(phoneNumber);
@@ -28,6 +57,9 @@ export async function sendCode(phoneNumber) {
   }
 
   try {
+
+    const { client, serviceSid } = ensureTwilioClient();
+
     await client.verify.v2.services(serviceSid)
       .verifications
       .create({ to: sanitizedPhone, channel: 'sms' });
@@ -86,6 +118,9 @@ export async function verifyCode(phoneNumber, code) {
   }
 
   try {
+
+    const { client, serviceSid } = ensureTwilioClient();
+    
     const result = await client.verify.v2.services(serviceSid)
       .verificationChecks
       .create({ to: sanitizedPhone, code });
