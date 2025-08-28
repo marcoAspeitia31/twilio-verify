@@ -1,21 +1,27 @@
 @host = http://localhost:5004
 @basicAuth = YWRtaW46c3VwZXJzZWN1cmVwYXNzd29yZA==
+@jwt = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoicHVibGljIiwiaWF0IjoxNzU2Mzk5NjkxLCJleHAiOjE3NTYzOTk3NTF9.K9zy23VtU5u5ZQJ5M_oT3PuzKWuIHMZwZ78G35yKFWA
+
+### Obtener JWT
+GET http://localhost:5004/api/token/get-public-token
+Content-Type: application/json
+Authorization: Basic {{basicAuth}}
 
 ### Enviar código de verificación
 POST http://localhost:5004/api/verify/send-code
 Content-Type: application/json
-Authorization: Basic {{basicAuth}}
-
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoicHVibGljIiwiaWF0IjoxNzU2Mzk5NjkxLCJleHAiOjE3NTYzOTk3NTF9.K9zy23VtU5u5ZQJ5M_oT3PuzKWuIHMZwZ78G35yKFWA
 {
-  "phoneNumber": "+527225494079"
+  "phoneNumber": "+527225494079",
+  "token": "tokenRecaptcha"
 }
 
 ### Verificar código
 POST http://localhost:5004/api/verify/verify-code
 Content-Type: application/json
-Authorization: Basic {{basicAuth}}
-
+Authorization: Bearer {{jwt}}
 {
   "phoneNumber": "+527225494079",
-  "code": "458121"
+  "code": "458121",
+  "token": "tokenRecaptcha"
 }

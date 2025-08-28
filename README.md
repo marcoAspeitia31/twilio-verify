@@ -187,10 +187,18 @@ npm start
 
 Todos los endpoints requieren **autenticación básica** (`AUTH_USER` / `AUTH_PASS`).
 
-| Método | Ruta                        | Descripción                    |
-|--------|-----------------------------|--------------------------------|
-| POST   | `/api/verify/send-code`     | Enviar SMS de verificación     |
-| POST   | `/api/verify/verify-code`   | Verificar código recibido      |
+| Método | Ruta                          | Descripción                    |
+|--------|-------------------------------|--------------------------------|
+| GET    | `/api/token/get-public-token` | Enviar SMS de verificación     |
+| POST   | `/api/verify/send-code`       | Enviar SMS de verificación     |
+| POST   | `/api/verify/verify-code`     | Verificar código recibido      |
+
+### `GET /api/token/get-public-token`
+
+Solicita un token temporal para realizar peticiones
+
+**Headers:**
+- `Authorization: Basic` con usuario y contraseña definidos en `.env`
 
 
 ### `POST /api/verify/send-code`
@@ -198,12 +206,13 @@ Todos los endpoints requieren **autenticación básica** (`AUTH_USER` / `AUTH_PA
 Envía un código SMS al número proporcionado.
 
 **Headers:**
-- `Authorization: Basic` con usuario y contraseña definidos en `.env`
+- `Authorization: Bearer token`
 
 **Body:**
 ```json
 {
-  "phoneNumber": "+521XXXXXXXXXX"
+  "phoneNumber": "+521XXXXXXXXXX",
+  "token": "tokenRecaptcha"
 }
 ```
 
@@ -214,13 +223,14 @@ Envía un código SMS al número proporcionado.
 Verifica el código recibido.
 
 **Headers:**
-- `Authorization: Basic` con usuario y contraseña definidos en `.env`
+- `Authorization: Bearer token`
 
 **Body:**
 ```json
 {
   "phoneNumber": "+521XXXXXXXXXX",
-  "code": "123456"
+  "code": "123456",
+  "token": "tokenRecaptcha"
 }
 ```
 

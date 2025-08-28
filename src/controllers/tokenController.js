@@ -1,3 +1,5 @@
+import { generatePublicToken } from "../services/jwtService.js";
+
 export const generateToken = (req, res) => {
   try {
     const token = generatePublicToken();
