@@ -2,6 +2,7 @@ import cors from 'cors';
 
 const allowedOrigins = process.env.CORS_ORIGINS?.split(',').map(origin => origin.trim()) || [];
 const allowedMethods = ['GET', 'POST', 'OPTIONS'];
+const allowedHeaders = ["Content-Type", "Authorization", "x-signature"];
 
 const corsOptionsDelegate = function (req, callback) {
   const origin = req.header('Origin');
@@ -11,7 +12,8 @@ const corsOptionsDelegate = function (req, callback) {
     return callback(null, {
       origin: false,
       methods: allowedMethods,
-      credentials: true
+      credentials: true,
+      allowedHeaders: allowedHeaders
     });
   }
 
@@ -19,7 +21,8 @@ const corsOptionsDelegate = function (req, callback) {
     return callback(null, {
       origin: true,
       methods: allowedMethods,
-      credentials: true
+      credentials: true,
+      allowedHeaders: allowedHeaders
     });
   }
 
