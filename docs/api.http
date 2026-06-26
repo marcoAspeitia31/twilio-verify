@@ -1,13 +1,32 @@
 @host = http://localhost:3000
 @basicAuth = YWRtaW46c3VwZXJzZWN1cmVwYXNzd29yZA==
 
-### Enviar código de verificación
+### Consultar tipo de línea (Lookup)
+POST http://localhost:3000/api/verify/lookup
+Content-Type: application/json
+Authorization: Basic {{basicAuth}}
+
+{
+  "phoneNumber": "7225428819"
+}
+
+### Enviar código de verificación (SMS - flujo productivo)
 POST http://localhost:3000/api/verify/send-code
 Content-Type: application/json
 Authorization: Basic {{basicAuth}}
 
 {
   "phoneNumber": "+527225494079"
+}
+
+### Enviar código de verificación (llamada - landline)
+POST http://localhost:3000/api/verify/send-code
+Content-Type: application/json
+Authorization: Basic {{basicAuth}}
+
+{
+  "phoneNumber": "7225428819",
+  "channel": "call"
 }
 
 ### Verificar código
