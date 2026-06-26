@@ -1,8 +1,8 @@
 import * as twilioService from '../services/twilioService.js';
 
 export async function sendCode(req, res) {
-    const { phoneNumber } = req.body;
-    const result = await twilioService.sendCode(phoneNumber);
+    const { phoneNumber, channel } = req.body;
+    const result = await twilioService.sendCode(phoneNumber, { channel });
     return res.status(result.status).json(result.payload);
 }
 
