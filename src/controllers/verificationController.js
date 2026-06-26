@@ -6,6 +6,12 @@ export async function sendCode(req, res) {
     return res.status(result.status).json(result.payload);
 }
 
+export async function lookupPhone(req, res) {
+    const { phoneNumber } = req.body;
+    const result = await twilioService.lookupLineType(phoneNumber);
+    return res.status(result.status).json(result.payload);
+}
+
 export async function verifyCode(req, res) {
     const { phoneNumber, code } = req.body;
     const result = await twilioService.verifyCode(phoneNumber, code);
