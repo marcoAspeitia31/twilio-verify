@@ -12,6 +12,7 @@ const serviceSid = process.env.TWILIO_VERIFY_SERVICE_SID;
 
 const LOOKUP_FIELDS = 'line_type_intelligence';
 const LANDLINE_TYPES = new Set(['landline', 'fixedVoip']);
+const VALID_CHANNELS = new Set(['sms', 'call']);
 
 export async function lookupLineType(phoneNumber) {
   const sanitizedPhone = sanitizeMexicanPhoneNumber(phoneNumber);
@@ -70,7 +71,7 @@ export async function lookupLineType(phoneNumber) {
   }
 }
 
-export async function sendCode(phoneNumber) {
+export async function sendCode(phoneNumber, { channel = 'sms' } = {}) {
   const sanitizedPhone = sanitizeMexicanPhoneNumber(phoneNumber);
 
   if (!phoneNumber) {
@@ -87,12 +88,37 @@ export async function sendCode(phoneNumber) {
     };
   }
 
+  if (!VALID_CHANNELS.has(channel)) {
+    return {
+      status: 400,
+      payload: { success: false, message: 'Canal inválido. Usa "sms" o "call".' }
+    };
+  }
+
+  const verificationPayload = {
+    to: sanitizedPhone,
+    channel,
+    ...(channel === 'call' && { locale: 'es' })
+  };
+
   try {
     await client.verify.v2.services(serviceSid)
       .verifications
-      .create({ to: sanitizedPhone, channel: 'sms' });
+      .create(verificationPayload);
 
-    logger.info(`Código enviado a ${sanitizedPhone}`);
+    logger.info(`Código enviado a ${sanitizedPhone} vía ${channel}`);
+
+    if (channel === 'call') {
+      return {
+        status: 200,
+        payload: {
+          success: true,
+          status: 'code_sent',
+          channel: 'call',
+          message: 'Te llamaremos con tu código de verificación'
+        }
+      };
+    }
 
     return {
       status: 200,
