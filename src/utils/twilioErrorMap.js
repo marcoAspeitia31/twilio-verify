@@ -13,6 +13,7 @@ export const twilioErrorMessages = {
   21608: 'No tienes permisos para enviar mensajes a ese número',
   21610: 'El destinatario se dio de baja, no se pueden enviar mensajes',
   21614: 'El número de teléfono no es válido o no es móvil',
+  21635: 'Este número está registrado como línea fija y no puede recibir SMS. Usa verificación por llamada.',
   30003: 'Mensaje fallido: el operador rechazó el envío',
   30006: 'Número suspendido o sin soporte para recibir mensajes SMS',
   30007: 'Mensaje bloqueado por filtrado (posible SPAM o política del operador)',
