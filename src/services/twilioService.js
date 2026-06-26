@@ -10,6 +10,66 @@ const client = twilio(
 
 const serviceSid = process.env.TWILIO_VERIFY_SERVICE_SID;
 
+const LOOKUP_FIELDS = 'line_type_intelligence';
+const LANDLINE_TYPES = new Set(['landline', 'fixedVoip']);
+
+export async function lookupLineType(phoneNumber) {
+  const sanitizedPhone = sanitizeMexicanPhoneNumber(phoneNumber);
+
+  if (!phoneNumber) {
+    return {
+      status: 400,
+      payload: { success: false, message: 'El número de teléfono es requerido' }
+    };
+  }
+
+  if (!sanitizedPhone) {
+    return {
+      status: 400,
+      payload: {
+        success: false,
+        message: 'Número inválido. Usa formato mexicano de 10 dígitos o +52'
+      }
+    };
+  }
+
+  try {
+    const result = await client.lookups.v2
+      .phoneNumbers(sanitizedPhone)
+      .fetch({ fields: LOOKUP_FIELDS });
+
+    const intelligence = result.lineTypeIntelligence ?? {};
+    const lineType = intelligence.type ?? null;
+
+    return {
+      status: 200,
+      payload: {
+        success: true,
+        phoneNumber: sanitizedPhone,
+        lineType,
+        carrierName: intelligence.carrierName ?? null,
+        isLandline: LANDLINE_TYPES.has(lineType)
+      }
+    };
+  } catch (err) {
+    const statusCode = err.status || 500;
+    const errorCode = err.code || 'unknown';
+    const translatedMessage = twilioErrorMessages[errorCode] || twilioErrorMessages['unknown'];
+
+    logger.error(`Error en lookup de ${sanitizedPhone} - ${translatedMessage}`);
+
+    return {
+      status: statusCode,
+      payload: {
+        success: false,
+        status: 'twilio_error',
+        errorCode,
+        message: translatedMessage
+      }
+    };
+  }
+}
+
 export async function sendCode(phoneNumber) {
   const sanitizedPhone = sanitizeMexicanPhoneNumber(phoneNumber);
 
